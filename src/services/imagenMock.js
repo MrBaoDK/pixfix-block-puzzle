@@ -4,11 +4,24 @@
 export async function generateTexture(imageFile, signal) {
   return new Promise((resolve, reject) => {
     let settled = false; // Track if promise has been settled
+    let timeoutId = null;
+    let reader = null;
     
     const settle = (callback) => {
       if (!settled) {
         settled = true;
         callback();
+      }
+    };
+    
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      if (reader) {
+        reader.abort();
+        reader = null;
       }
     };
     
@@ -18,26 +31,28 @@ export async function generateTexture(imageFile, signal) {
       return;
     }
 
+    // Single abort handler for all cleanup
+    const abortHandler = () => {
+      cleanup();
+      settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
+    };
+    
+    if (signal) {
+      signal.addEventListener('abort', abortHandler, { once: true });
+    }
+
     // Simulate 2-second API delay
-    const timeoutId = setTimeout(() => {
-      // Check again after timeout
+    timeoutId = setTimeout(() => {
+      timeoutId = null;
+      
+      // Check if aborted during timeout
       if (signal?.aborted) {
         settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
         return;
       }
 
       // Create a data URL from the uploaded image file
-      const reader = new FileReader();
-      
-      // Abort handler for FileReader
-      const abortHandler = () => {
-        reader.abort();
-        settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
-      };
-      
-      if (signal) {
-        signal.addEventListener('abort', abortHandler, { once: true });
-      }
+      reader = new FileReader();
       
       reader.onload = (e) => {
         if (!signal?.aborted) {
@@ -69,13 +84,5 @@ export async function generateTexture(imageFile, signal) {
         }));
       }
     }, 2000);
-
-    // Handle abort during timeout
-    if (signal) {
-      signal.addEventListener('abort', () => {
-        clearTimeout(timeoutId);
-        settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
-      }, { once: true });
-    }
   });
 }

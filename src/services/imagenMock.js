@@ -6,10 +6,12 @@ export async function generateTexture(imageFile, signal) {
     let settled = false; // Track if promise has been settled
     let timeoutId = null;
     let reader = null;
+    let abortHandler = null;
     
     const settle = (callback) => {
       if (!settled) {
         settled = true;
+        cleanup();
         callback();
       }
     };
@@ -19,9 +21,17 @@ export async function generateTexture(imageFile, signal) {
         clearTimeout(timeoutId);
         timeoutId = null;
       }
-      if (reader) {
-        reader.abort();
+      if (reader && reader.readyState === FileReader.LOADING) {
+        try {
+          reader.abort();
+        } catch (e) {
+          // Reader might already be done, ignore error
+        }
         reader = null;
+      }
+      if (abortHandler && signal) {
+        signal.removeEventListener('abort', abortHandler);
+        abortHandler = null;
       }
     };
     
@@ -32,8 +42,7 @@ export async function generateTexture(imageFile, signal) {
     }
 
     // Single abort handler for all cleanup
-    const abortHandler = () => {
-      cleanup();
+    abortHandler = () => {
       settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
     };
     

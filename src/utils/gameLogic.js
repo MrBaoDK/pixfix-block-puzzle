@@ -1,5 +1,7 @@
 // Game logic utilities for collision detection and line clearing
 
+const BOARD_SIZE = 10;
+
 export function canPlaceShape(board, shape, startRow, startCol) {
   const pattern = shape.pattern;
   
@@ -10,7 +12,7 @@ export function canPlaceShape(board, shape, startRow, startCol) {
         const boardCol = startCol + c;
         
         // Check if position is out of bounds
-        if (boardRow < 0 || boardRow >= 10 || boardCol < 0 || boardCol >= 10) {
+        if (boardRow < 0 || boardRow >= BOARD_SIZE || boardCol < 0 || boardCol >= BOARD_SIZE) {
           return false;
         }
         
@@ -45,38 +47,40 @@ export function checkAndClearLines(board) {
   let linesCleared = 0;
   let cellsCleared = 0;
   
+  // Track which cells were cleared to avoid double counting
+  const clearedCells = new Set();
+  
   // Check horizontal lines
-  for (let r = 0; r < 10; r++) {
+  for (let r = 0; r < BOARD_SIZE; r++) {
     if (newBoard[r].every(cell => cell !== null)) {
-      newBoard[r] = newBoard[r].map(() => null);
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        clearedCells.add(`${r},${c}`);
+        newBoard[r][c] = null;
+      }
       linesCleared++;
-      cellsCleared += 10;
     }
   }
   
   // Check vertical lines
-  for (let c = 0; c < 10; c++) {
+  for (let c = 0; c < BOARD_SIZE; c++) {
     if (newBoard.every(row => row[c] !== null)) {
-      newBoard.forEach(row => {
-        if (row[c] !== null) {
-          row[c] = null;
-          // Only count if not already cleared by horizontal line
-          if (linesCleared === 0 || newBoard[0][c] === null) {
-            cellsCleared++;
-          }
-        }
-      });
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        clearedCells.add(`${r},${c}`);
+        newBoard[r][c] = null;
+      }
       linesCleared++;
     }
   }
+  
+  cellsCleared = clearedCells.size;
   
   return { board: newBoard, linesCleared, cellsCleared };
 }
 
 export function hasValidMove(board, shapes) {
   for (const shape of shapes) {
-    for (let r = 0; r < 10; r++) {
-      for (let c = 0; c < 10; c++) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
         if (canPlaceShape(board, shape, r, c)) {
           return true;
         }
@@ -87,7 +91,7 @@ export function hasValidMove(board, shapes) {
 }
 
 export function createEmptyBoard() {
-  return Array(10).fill(null).map(() => Array(10).fill(null));
+  return Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
 }
 
 export function calculateScore(shape, linesCleared, cellsCleared) {

@@ -13,6 +13,9 @@ import {
   calculateScore
 } from './utils/gameLogic';
 
+// Constants
+const CELL_SIZE = 33; // Tailwind w-8 (32px) + gap (0.5 = 2px) ≈ 33px per cell
+
 function App() {
   const [board, setBoard] = useState(createEmptyBoard());
   const [shapes, setShapes] = useState(getRandomShapes(3));
@@ -137,9 +140,8 @@ function App() {
               onMouseMove={(e) => {
                 if (!selectedShape) return;
                 const rect = e.currentTarget.getBoundingClientRect();
-                const cellSize = 33; // approximate cell size including gap
-                const col = Math.floor((e.clientX - rect.left - 8) / cellSize);
-                const row = Math.floor((e.clientY - rect.top - 8) / cellSize);
+                const col = Math.floor((e.clientX - rect.left - 8) / CELL_SIZE);
+                const row = Math.floor((e.clientY - rect.top - 8) / CELL_SIZE);
                 if (row >= 0 && row < 10 && col >= 0 && col < 10) {
                   handleBoardHover(row, col);
                 }

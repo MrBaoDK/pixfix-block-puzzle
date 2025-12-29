@@ -1,16 +1,81 @@
-# React + Vite
+# PixFit Block Puzzle
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A 1010!-style block puzzle game built with React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Game Mechanics
+- **10x10 Grid**: Classic block puzzle gameplay on a 10x10 board
+- **17 Unique Shapes**: Various block configurations including lines, L-shapes, T-shapes, squares, and more
+- **Click-to-Play**: Select a shape from the tray, then click on the board to place it
+- **Ghost Preview**: Visual feedback shows where your shape will be placed
+- **Line Clearing**: Complete rows or columns are automatically cleared
+- **Smart Scoring**: Earn points for placing blocks with bonuses for clearing lines
+- **High Score**: Your best score is saved locally
+- **Game Over Detection**: The game detects when no valid moves remain
 
-## React Compiler
+### Theme Customization
+- **Image Upload**: Upload any image to use as a custom texture
+- **Mock Imagen API**: Simulates a 2-second API delay (like Google Imagen)
+- **Dynamic Textures**: Your uploaded image is applied to all filled blocks
+- **Easy Reset**: Return to default styling with one click
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### How to Play
+
+1. **Select a Shape**: Click on any shape in the "Available Shapes" tray at the bottom
+2. **Place the Shape**: Click on any valid position on the 10x10 grid
+3. **Clear Lines**: Complete entire rows or columns to clear them and score bonus points
+4. **Keep Playing**: New shapes appear when all three are placed
+5. **Customize Theme**: Upload an image using the Theme Generator to personalize your blocks
+
+## Technology Stack
+
+- **React 18**: Modern React with Hooks
+- **Vite 7**: Lightning-fast build tool and dev server
+- **Tailwind CSS 4**: Utility-first CSS framework with the new v4 syntax
+- **LocalStorage**: High score persistence
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── GameBoard.jsx   # 10x10 game grid
+│   ├── ShapeTray.jsx   # Available shapes display
+│   ├── ScoreBoard.jsx  # Score tracking
+│   └── ThemeGenerator.jsx  # Image upload and texture application
+├── data/
+│   └── shapes.js       # Shape definitions and utilities
+├── services/
+│   └── imagenMock.js   # Mock image API with 2s delay
+├── utils/
+│   └── gameLogic.js    # Game logic utilities
+└── App.jsx             # Main app component
+```
+
+## License
+
+MIT
+

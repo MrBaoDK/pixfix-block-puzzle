@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import ShapeTray from './components/ShapeTray';
 import ScoreBoard from './components/ScoreBoard';
@@ -30,6 +30,7 @@ function App() {
   const [ghostPosition, setGhostPosition] = useState(null);
   const [texture, setTexture] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const boardRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('highScore', highScore.toString());
@@ -140,11 +141,18 @@ function App() {
 
           <div className="lg:col-span-2 flex justify-center items-start">
             <div
+              ref={boardRef}
               onMouseMove={(e) => {
-                if (!selectedShape) return;
-                const rect = e.currentTarget.getBoundingClientRect();
-                const col = Math.floor((e.clientX - rect.left - 8) / CELL_SIZE);
-                const row = Math.floor((e.clientY - rect.top - 8) / CELL_SIZE);
+                if (!selectedShape || !boardRef.current) return;
+                
+                // Find the grid element inside the GameBoard component
+                const gridElement = boardRef.current.querySelector('.grid.grid-cols-10');
+                if (!gridElement) return;
+                
+                const rect = gridElement.getBoundingClientRect();
+                const col = Math.floor((e.clientX - rect.left) / CELL_SIZE);
+                const row = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+                
                 if (row >= 0 && row < 10 && col >= 0 && col < 10) {
                   handleBoardHover(row, col);
                 }

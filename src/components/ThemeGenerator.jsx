@@ -1,9 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { generateTexture } from '../services/imagenMock';
 
 function ThemeGenerator({ onTextureGenerated }) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const abortControllerRef = useRef(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -15,11 +25,19 @@ function ThemeGenerator({ onTextureGenerated }) {
       return;
     }
     
+    // Cancel any existing operation
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new AbortController for this operation
+    abortControllerRef.current = new AbortController();
+    
     setIsLoading(true);
     setMessage('Generating texture (simulating Imagen API)...');
     
     try {
-      const result = await generateTexture(file);
+      const result = await generateTexture(file, abortControllerRef.current.signal);
       
       if (result.success) {
         setMessage('Texture generated successfully!');
@@ -29,9 +47,14 @@ function ThemeGenerator({ onTextureGenerated }) {
         setMessage(result.message);
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        // Operation was cancelled, don't show error message
+        return;
+      }
       setMessage('Error generating texture');
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 

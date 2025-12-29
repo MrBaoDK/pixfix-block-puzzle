@@ -14,7 +14,10 @@ import {
 } from './utils/gameLogic';
 
 // Constants
-const CELL_SIZE = 33; // Tailwind w-8 (32px) + gap (0.5 = 2px) ≈ 33px per cell
+// NOTE: This value must stay in sync with the cell size defined in GameBoard.jsx.
+// Tailwind w-8 (32px) + gap-0.5 (2px) ≈ 33px per cell. If those classes or layout change,
+// update this constant accordingly.
+const CELL_SIZE = 33;
 
 function App() {
   const [board, setBoard] = useState(createEmptyBoard());

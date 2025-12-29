@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 function ShapeTray({ shapes, onShapeSelect, selectedShape, texture }) {
   const getCellStyle = () => {
     if (!texture) return {};
@@ -13,7 +11,6 @@ function ShapeTray({ shapes, onShapeSelect, selectedShape, texture }) {
 
   const renderShape = (shape, isSelected) => {
     const pattern = shape.pattern;
-    const maxDim = Math.max(pattern.length, pattern[0]?.length || 0);
     
     return (
       <div

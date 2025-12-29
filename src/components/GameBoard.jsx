@@ -1,8 +1,4 @@
-import { useState } from 'react';
-
 function GameBoard({ board, onCellClick, ghostShape, ghostPosition, texture }) {
-  const [hoveredCell, setHoveredCell] = useState(null);
-
   const isGhostCell = (row, col) => {
     if (!ghostShape || !ghostPosition) return false;
     
@@ -45,8 +41,6 @@ function GameBoard({ board, onCellClick, ghostShape, ghostPosition, texture }) {
                 ${isGhostCell(rowIndex, colIndex) ? 'ring-2 ring-green-400 ring-opacity-50 bg-green-500 bg-opacity-30' : ''}
               `}
               style={cell !== null ? getCellStyle(cell) : {}}
-              onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
-              onMouseLeave={() => setHoveredCell(null)}
               onClick={() => onCellClick && onCellClick(rowIndex, colIndex)}
             />
           ))

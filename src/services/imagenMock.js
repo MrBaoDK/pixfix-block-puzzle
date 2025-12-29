@@ -3,9 +3,18 @@
 
 export async function generateTexture(imageFile, signal) {
   return new Promise((resolve, reject) => {
+    let settled = false; // Track if promise has been settled
+    
+    const settle = (callback) => {
+      if (!settled) {
+        settled = true;
+        callback();
+      }
+    };
+    
     // Check if already aborted
     if (signal?.aborted) {
-      reject(new DOMException('Operation aborted', 'AbortError'));
+      settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
       return;
     }
 
@@ -13,51 +22,51 @@ export async function generateTexture(imageFile, signal) {
     const timeoutId = setTimeout(() => {
       // Check again after timeout
       if (signal?.aborted) {
-        reject(new DOMException('Operation aborted', 'AbortError'));
+        settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
         return;
       }
 
       // Create a data URL from the uploaded image file
       const reader = new FileReader();
       
-      reader.onload = (e) => {
-        if (!signal?.aborted) {
-          resolve({
-            success: true,
-            textureUrl: e.target.result,
-            message: 'Texture generated successfully'
-          });
-        }
-      };
-      
-      reader.onerror = () => {
-        if (!signal?.aborted) {
-          resolve({
-            success: false,
-            textureUrl: null,
-            message: 'Failed to read image file'
-          });
-        }
-      };
-      
       // Abort handler for FileReader
       const abortHandler = () => {
         reader.abort();
-        reject(new DOMException('Operation aborted', 'AbortError'));
+        settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
       };
       
       if (signal) {
         signal.addEventListener('abort', abortHandler, { once: true });
       }
       
+      reader.onload = (e) => {
+        if (!signal?.aborted) {
+          settle(() => resolve({
+            success: true,
+            textureUrl: e.target.result,
+            message: 'Texture generated successfully'
+          }));
+        }
+      };
+      
+      reader.onerror = () => {
+        if (!signal?.aborted) {
+          settle(() => resolve({
+            success: false,
+            textureUrl: null,
+            message: 'Failed to read image file'
+          }));
+        }
+      };
+      
       if (imageFile) {
         reader.readAsDataURL(imageFile);
       } else {
-        resolve({
+        settle(() => resolve({
           success: false,
           textureUrl: null,
           message: 'No image file provided'
-        });
+        }));
       }
     }, 2000);
 
@@ -65,7 +74,7 @@ export async function generateTexture(imageFile, signal) {
     if (signal) {
       signal.addEventListener('abort', () => {
         clearTimeout(timeoutId);
-        reject(new DOMException('Operation aborted', 'AbortError'));
+        settle(() => reject(new DOMException('Operation aborted', 'AbortError')));
       }, { once: true });
     }
   });
